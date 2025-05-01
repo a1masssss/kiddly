@@ -1,7 +1,7 @@
 from django.urls import path
-from genai.views import lessons
+from genai.views import genai
 
 
 urlpatterns = [
-    path('', lessons, name = 'lessons')
+    path('', genai, name = 'genai')
 ]

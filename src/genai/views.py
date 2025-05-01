@@ -1,5 +1,5 @@
 from django.shortcuts import render
 
 
-def lessons(request):
-    return render(request, 'lessons.html')
+def genai(request):
+    return render(request, 'genai.html')

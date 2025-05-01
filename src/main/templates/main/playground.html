@@ -1,0 +1,323 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">AI Chat Playground</h1>
+    
+    <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+        <div id="chat-box" class="h-96 p-4 overflow-y-auto bg-gray-50">
+            <div class="text-center text-gray-500 my-4">Start a conversation with the AI!</div>
+        </div>
+        
+        <div class="border-t p-4 bg-white">
+            <!-- Input area -->
+            <div class="flex mb-4">
+                <input type="text" id="user-input" placeholder="Type your message..." 
+                       class="flex-grow px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="send-btn" 
+                        class="ml-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition duration-200">
+                    Send
+                </button>
+            </div>
+            
+            <!-- Model selector -->
+            <div class="relative">
+                <div id="model-select-btn" class="flex items-center cursor-pointer mb-2">
+                    <span id="current-model" class="font-medium">Dall-e-3</span>
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                
+                <div id="model-dropdown" class="hidden absolute left-0 right-0 bg-white rounded-md shadow-lg z-10 border">
+                    <div class="p-3">
+                        <div class="font-medium text-sm mb-2">Model</div>
+                        
+                        <!-- ChatGPT Option -->
+                        <div class="model-option p-2 hover:bg-gray-100 cursor-pointer flex items-center" data-model="gpt-4o-mini">
+                            <div class="flex-grow">
+                                <div class="font-medium">ChatGPT-4o-mini</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dall-E Option -->
+                        <div class="model-option p-2 bg-black text-white cursor-pointer flex items-center active" data-model="dall-e-3">
+                            <div class="flex-grow">
+                                <div class="font-medium">DALL-E</div>
+                                <div class="text-sm">Dall-e-3</div>
+                            </div>
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path>
+                            </svg>
+                        </div>
+                        
+                        <!-- Claude Option -->
+                        <div class="model-option p-2 hover:bg-gray-100 cursor-not-allowed opacity-60 flex items-center" data-model="claude">
+                            <div class="flex-grow">
+                                <div class="font-medium">Claude</div>
+                            </div>
+                            <span class="text-xs bg-gray-200 px-2 py-1 rounded">COMING SOON</span>
+                        </div>
+                        
+                        <!-- More models with COMING SOON labels -->
+                        <div class="model-option p-2 hover:bg-gray-100 cursor-not-allowed opacity-60 flex items-center" data-model="gemini">
+                            <div class="flex-grow">
+                                <div class="font-medium">Gemini</div>
+                            </div>
+                            <span class="text-xs bg-gray-200 px-2 py-1 rounded">COMING SOON</span>
+                        </div>
+                        
+                        <div class="model-option p-2 hover:bg-gray-100 cursor-not-allowed opacity-60 flex items-center" data-model="grok">
+                            <div class="flex-grow">
+                                <div class="font-medium">Grok</div>
+                            </div>
+                            <span class="text-xs bg-gray-200 px-2 py-1 rounded">COMING SOON</span>
+                        </div>
+                        
+                        <div class="model-option p-2 hover:bg-gray-100 cursor-not-allowed opacity-60 flex items-center" data-model="perplexity">
+                            <div class="flex-grow">
+                                <div class="font-medium">Perplexity</div>
+                            </div>
+                            <span class="text-xs bg-gray-200 px-2 py-1 rounded">COMING SOON</span>
+                        </div>
+                        
+                        <div class="model-option p-2 hover:bg-gray-100 cursor-not-allowed opacity-60 flex items-center" data-model="stable-diffusion">
+                            <div class="flex-grow">
+                                <div class="font-medium">Stable Diffusion</div>
+                            </div>
+                            <span class="text-xs bg-gray-200 px-2 py-1 rounded">COMING SOON</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="max-w-3xl mx-auto mt-6 text-center text-gray-600 text-sm">
+        <p>Ask the AI about anything! Try questions about:</p>
+        <div class="flex flex-wrap justify-center gap-2 mt-2">
+            <button class="suggestion-btn bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-full text-blue-800">What is AI?</button>
+            <button class="suggestion-btn bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-full text-blue-800">Tell me a story</button>
+            <button class="suggestion-btn bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-full text-blue-800">How do computers learn?</button>
+            <button class="suggestion-btn bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-full text-blue-800">What is machine learning?</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const suggestionBtns = document.querySelectorAll('.suggestion-btn');
+    const modelSelectBtn = document.getElementById('model-select-btn');
+    const modelDropdown = document.getElementById('model-dropdown');
+    const modelOptions = document.querySelectorAll('.model-option');
+    const currentModelDisplay = document.getElementById('current-model');
+    
+    // Track current model
+    let currentModel = 'dall-e-3';
+
+    // Model selector dropdown toggle
+    modelSelectBtn.addEventListener('click', () => {
+        modelDropdown.classList.toggle('hidden');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!modelSelectBtn.contains(e.target) && !modelDropdown.contains(e.target)) {
+            modelDropdown.classList.add('hidden');
+        }
+    });
+
+    // Model selection
+    modelOptions.forEach(option => {
+        if (!option.classList.contains('cursor-not-allowed')) {
+            option.addEventListener('click', () => {
+                currentModel = option.dataset.model;
+                
+                // Update model display name
+                let displayName = option.querySelector('.font-medium').textContent;
+                currentModelDisplay.textContent = displayName;
+                
+                // Update active state - only for available models
+                modelOptions.forEach(opt => {
+                    if (!opt.classList.contains('cursor-not-allowed')) {
+                        opt.classList.remove('bg-black', 'text-white');
+                        opt.classList.add('hover:bg-gray-100');
+                    }
+                });
+                option.classList.remove('hover:bg-gray-100');
+                option.classList.add('bg-black', 'text-white');
+                
+                modelDropdown.classList.add('hidden');
+            });
+        }
+    });
+
+    // Function to append messages to chat
+    function appendMessage(sender, text) {
+        const messageElem = document.createElement('div');
+        messageElem.className = 'mb-4';
+        
+        const bubbleClass = sender === 'You' 
+            ? 'bg-blue-100 text-blue-800 ml-auto rounded-tl-lg rounded-tr-lg rounded-bl-lg' 
+            : 'bg-gray-200 text-gray-800 mr-auto rounded-tl-lg rounded-tr-lg rounded-br-lg';
+        
+        messageElem.innerHTML = `
+            <div class="flex items-end ${sender === 'You' ? 'justify-end' : ''}">
+                <div class="max-w-[75%] px-4 py-2 ${bubbleClass}">
+                    <div class="font-semibold text-xs mb-1">${sender}</div>
+                    <div>${text}</div>
+                </div>
+            </div>
+        `;
+        
+        chatBox.appendChild(messageElem);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Send message function
+    function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        appendMessage('You', message);
+        userInput.value = '';
+        userInput.focus();
+
+        // Show typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.id = 'typing-indicator';
+        typingIndicator.className = 'flex items-end mb-4';
+        typingIndicator.innerHTML = `
+            <div class="max-w-[75%] px-4 py-2 bg-gray-200 text-gray-800 mr-auto rounded-tl-lg rounded-tr-lg rounded-br-lg">
+                <div class="font-semibold text-xs mb-1">AI</div>
+                <div class="flex space-x-1">
+                    <div class="typing-dot bg-gray-600"></div>
+                    <div class="typing-dot bg-gray-600"></div>
+                    <div class="typing-dot bg-gray-600"></div>
+                </div>
+            </div>
+        `;
+        chatBox.appendChild(typingIndicator);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Send the message to the server
+        fetch("{% url 'playground' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ 
+                message: message,
+                model: currentModel
+            })
+        }).then(response => {
+            // Remove typing indicator
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+            
+            // Create response element
+            const responseElem = document.createElement('div');
+            responseElem.className = 'flex items-end mb-4';
+            responseElem.innerHTML = `
+                <div class="max-w-[75%] px-4 py-2 bg-gray-200 text-gray-800 mr-auto rounded-tl-lg rounded-tr-lg rounded-br-lg">
+                    <div class="font-semibold text-xs mb-1">AI</div>
+                    <div id="response-content"></div>
+                </div>
+            `;
+            chatBox.appendChild(responseElem);
+            
+            const responseContent = document.getElementById('response-content');
+            let fullResponse = '';
+            
+            // Handle SSE response stream
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            
+            function processStream() {
+                return reader.read().then(({ done, value }) => {
+                    if (done) return;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    
+                    // Parse SSE format - process each line
+                    const lines = chunk.split('\n\n');
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = line.substring(6); // Remove 'data: ' prefix
+                            if (data && data !== '[Error') {
+                                // Check if the response contains an image tag
+                                if (data.includes('<img src=')) {
+                                    // For image responses, use innerHTML instead of textContent
+                                    responseContent.innerHTML += data;
+                                } else {
+                                    fullResponse += data;
+                                    responseContent.textContent = fullResponse;
+                                }
+                                chatBox.scrollTop = chatBox.scrollHeight;
+                            }
+                        }
+                    }
+                    
+                    return processStream();
+                });
+            }
+            
+            processStream().catch(error => {
+                responseContent.textContent = fullResponse || 'Error receiving response';
+            });
+        }).catch(error => {
+            // Remove typing indicator
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+            
+            appendMessage('AI', `Sorry, there was an error: ${error.message}. Please try again.`);
+        });
+    }
+
+    // Event listeners
+    sendBtn.addEventListener('click', sendMessage);
+    
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Suggestion buttons
+    suggestionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            userInput.value = btn.textContent;
+            sendMessage();
+        });
+    });
+</script>
+
+<style>
+    .typing-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        animation: typing 1.5s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    
+    @keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-6px);
+        }
+    }
+</style>
+{% endblock %}
